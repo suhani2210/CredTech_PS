@@ -60,9 +60,9 @@ def normalize_score(score: float, min_val: float, max_val: float) -> float:
 
 def combined_credit_score(
     fin: CompanyFinancials,
-    weight_altman: float = 0.4,
+    weight_altman: float = 0.5,
     weight_ohlson: float = 0.4,
-    weight_sentiment: float = 0.2,
+    weight_sentiment: float = 0.1,
 ) -> Tuple[float, Tuple[float, float]]:
     """
     Combine Altman Z, Ohlson O, and sentiment into a final score.
