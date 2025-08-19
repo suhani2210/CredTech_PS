@@ -4,12 +4,15 @@ import numpy as np
 from typing import List, Dict
 import logging
 from credtech import altman_z_score, ohlson_o_score, normalize_score, CompanyFinancials
+from unstructured import news_sentiment_score
+
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def fetch_and_compute_credit_scores(
     tickers: List[str], 
-    custom_sentiment: Dict[str, float] = None,
+    # custom_sentiment: Dict[str, float] = None,
     weight_altman: float = 0.50,
     weight_ohlson: float = 0.40,
     weight_sentiment: float = 0.10
@@ -113,10 +116,7 @@ def fetch_and_compute_credit_scores(
             revenue = max(apply_default(revenue, 0, "revenue"), 0)
             net_income = apply_default(net_income, 0, "net_income")
             # Get sentiment score
-            if custom_sentiment and ticker in custom_sentiment:
-                sentiment_score = custom_sentiment[ticker]
-            else:
-                sentiment_score = 0.5  # Neutral default
+            sentiment_score = news_sentiment_score(ticker)
 
             fin = CompanyFinancials(
                 total_assets=total_assets,
@@ -161,16 +161,12 @@ def fetch_and_compute_credit_scores(
     logger.info(f"Processed {len(results)} of {len(tickers)}")
     return results
 
-""""
+
 # Example usage
 
-results = fetch_and_compute_credit_scores(
-    tickers=['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA'],
-    custom_sentiment={'AAPL': 0.8, 'GOOGL': 0.75, 'MSFT': 0.9, 'AMZN': 0.65, 'TSLA': 0.6}
-)
+results = fetch_and_compute_credit_scores(tickers=['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA','AAME','JPM', 'BAC', 'ADBE', 'DELL', 'IBM', 'NFLX', 'NVDA', 'META', 'INTC'])
 for ticker, score_data in results.items():
     print(f"{ticker}: Base Score = {score_data['base_score']}, "
           f"Range = ({score_data['score_min']}, {score_data['score_max']}), "
           f"Altman Z = {score_data['altman_z']}, Ohlson O = {score_data['ohlson_o']}, "
           f"Sentiment = {score_data['sentiment']}")
-"""
