@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 def fetch_and_compute_credit_scores(
     tickers: List[str], 
-    # custom_sentiment: Dict[str, float] = None,
     weight_altman: float = 0.50,
     weight_ohlson: float = 0.40,
     weight_sentiment: float = 0.10
@@ -141,8 +140,11 @@ def fetch_and_compute_credit_scores(
                 + weight_ohlson * ohlson_norm
                 + weight_sentiment * sentiment_score * 100
             )
-            margin = final_score * 0.05
-            score_min, score_max = final_score - margin, final_score + margin
+            
+            margin_high = sentiment_score*0.1*(100-final_score)
+            margin_low = (1-sentiment_score)*0.1*(100-final_score)
+            
+            score_min, score_max = final_score - margin_low, final_score + margin_high
 
             results[ticker] = {
                 'base_score': round(final_score, 2),
@@ -164,7 +166,7 @@ def fetch_and_compute_credit_scores(
 
 # Example usage
 
-results = fetch_and_compute_credit_scores(tickers=['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA','AAME','JPM', 'BAC', 'ADBE', 'DELL', 'IBM', 'NFLX', 'NVDA', 'META', 'INTC'])
+results = fetch_and_compute_credit_scores(tickers=['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'ADBE', 'DELL', 'IBM', 'NFLX', 'NVDA', 'META', 'INTC'])
 for ticker, score_data in results.items():
     print(f"{ticker}: Base Score = {score_data['base_score']}, "
           f"Range = ({score_data['score_min']}, {score_data['score_max']}), "
