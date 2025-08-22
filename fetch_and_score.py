@@ -163,6 +163,62 @@ def fetch_and_compute_credit_scores(
     logger.info(f"Processed {len(results)} of {len(tickers)}")
     return results
 
+# Add this function to your existing credit scoring file
+def get_score_breakdown_data():
+    """Generate data for pie chart visualization"""
+    
+    # Altman Z-Score component weights (relative importance)
+    altman_breakdown = {
+        'Working Capital Efficiency': 11.78,
+        'Retained Earnings': 13.91, 
+        'Operating Performance': 51.03,  # Highest impact
+        'Market Valuation': 6.90,
+        'Asset Turnover': 16.39
+    }
+    
+    # Ohlson O-Score component weights  
+    ohlson_breakdown = {
+        'Company Size': 25.89,
+        'Debt Structure': 8.17,
+        'Working Capital': 28.70,  # Highest impact
+        'Liquidity Position': 1.52,
+        'Profitability': 7.43,
+        'Income Stability': 24.89,
+        'Sales Efficiency': 3.41
+    }
+    
+    return {
+        'altman': altman_breakdown,
+        'ohlson': ohlson_breakdown,
+        'weights': {
+            'altman_weight': 50,    # 50% of total score
+            'ohlson_weight': 40,    # 40% of total score  
+            'sentiment_weight': 10  # 10% of total score
+        }
+    }
+
+def get_detailed_breakdown_for_ticker(ticker: str):
+    """Get detailed breakdown for a specific ticker including actual values"""
+    try:
+        # Use existing function to get the scores
+        results = fetch_and_compute_credit_scores([ticker])
+        
+        if ticker not in results:
+            return None
+            
+        score_data = results[ticker]
+        breakdown_data = get_score_breakdown_data()
+        
+        return {
+            'ticker': ticker,
+            'scores': score_data,
+            'breakdown': breakdown_data,
+            'timestamp': datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error getting breakdown for {ticker}: {str(e)}")
+        return None
+
 
 # Example usage
 
